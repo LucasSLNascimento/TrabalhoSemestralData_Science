@@ -29,7 +29,7 @@ dados_num_normalizado = modelo_normalizador.transform(dados_num)
 dados_final = pd.DataFrame(data=dados_num_normalizado, columns=['deg-malig'])
 dados_final = dados_final.join(dados_cat_normalizado, how='left')
 
-# print(dados_final)
+print(dados_final)
 
 X = dados_final.drop(columns=['Class_recurrence-events', 'Class_no-recurrence-events'])
 y = dados_final['Class_recurrence-events']
@@ -37,11 +37,33 @@ y = dados_final['Class_recurrence-events']
 smote = SMOTE(random_state=42)
 X_resampled, y_resampled = smote.fit_resample(X, y)
 
-# print("Antes do balanceamento:")
-# print(y.value_counts())
 
-# print("\nDepois do balanceamento:")
-# print(pd.Series(y_resampled).value_counts())
+print("Antes do balanceamento:")
+print(y.value_counts())
+
+print("\nDepois do balanceamento:")
+print(pd.Series(y_resampled).value_counts())
+
+dado_classes = y_resampled
+dado_atributos = X_resampled
+
+tree = DecisionTreeClassifier()
+atr_train, atr_test, class_train, class_test  = train_test_split(dado_atributos, dado_classes, test_size=0.3)
+fertility_tree = tree.fit(atr_train, class_train)
+Class_predict = fertility_tree.predict(atr_test)
+print('Treinamento')
+print(Class_predict)
+
+acuracia = accuracy_score(class_test, Class_predict)
+taxa_erro = 1 - acuracia
+
+print(f'Acurácia: {acuracia:.2f}')
+print(f'Taxa de Erro: {taxa_erro:.2f}')
+
+cm = confusion_matrix(class_test, Class_predict)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels= fertility_tree.classes_)
+disp.plot()
+plt.show() 
 
 
 
